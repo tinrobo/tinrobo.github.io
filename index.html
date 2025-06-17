@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style>
+			.flex-container {
+				display: flex;
+				flex-direction: row;
+			}
+			
+			.flex-container > div {
+				margin: 5px;
+				padding: 5px;
+			}
+			
+			ol li{
+			  list-style-type: none;
+			}
+		</style>
+		<script>
+			const failColour = "#FF0000";
+			const critColour = "#28B463";
+			
+			const multipleDiceSelection = [ "2d8", "3d6" ];
+			const selectedDice = [];
+			
+			var diceRollHistory = null;
+			var totalRollValue = 0;
+			
+			window.onload = init;
+
+			// Listens for the user clicking on the roll buttons in the dice table.
+			function init(){
+				var table = document.getElementById("diceTable");
+				table.addEventListener("click", (event) => {
+					if (event.target.matches("button.roll")) {
+						rollIndividualDice(event.target);
+					}
+				});
+				
+				diceRollHistory = document.getElementById("diceRollHistory");
+				displayNewTotal();
+			}
+
+			// Random number generation
+			function getRndInteger(min, max) {
+				return Math.floor((Math.random() * max) + min);
+			}
+			
+			// Roll Functions
+			function rollIndividualDice(element) {		
+				const row = element.closest("tr");
+				return rollDiceForRow(row);
+			}
+			
+			// Rolls the dice for a given table row (e.g. the d2 row, the d10 row etc.).
+			function rollDiceForRow(row) {
+				const rollValueElement = row.cells[row.cells.length - 1];
+				let diceTypeElement = row.cells[0];
+				const diceType = diceTypeElement.innerText;
+				var rollValue = 0;
+				var maximumValue = 0;
+				var calculationString = "";
+				
+				if (multipleDiceSelection.includes(diceType)) {
+					const indexOfD = diceType.lastIndexOf("d");
+					const diceValue = diceType.substr(indexOfD + 1);
+					const numberOfRolls = diceType.substr(0, indexOfD);
+					const { localRollValue, localCalculationString } = rollMultipleDice(diceValue, numberOfRolls);	
+					
+					rollValue = localRollValue;
+					calculationString = localCalculationString;
+				} else {
+					maximumValue = diceType.replace("d", "");
+					rollValue = getRndInteger(1, maximumValue);
+				}
+				
+				writeResult(rollValueElement, diceType, rollValue, maximumValue, calculationString);
+				totalRollValue += rollValue;
+				displayNewTotal();
+				return rollValue;
+			}
+			
+			// E.g. Rolls specific dice: 2d6, 3d8 etc. and gives their total and calculations.
+			function rollMultipleDice(diceValue, amountOfRolls) {				
+				var localRollValue = 0;
+				var localCalculationString = "";
+				
+				localCalculationString = "( ";
+				for (let i = 0; i < amountOfRolls; i++) {
+					const dRollValue = getRndInteger(1, diceValue);
+					localRollValue += dRollValue;
+					var str = "";
+					if (dRollValue == 1) {
+						str = "<span style='color:" + failColour + ";font-weight:bold;'>" + dRollValue + "</span>";
+					} else if (dRollValue == diceValue) {
+						str = "<span style='color:" + critColour + ";font-weight:bold;'>" + dRollValue + "</span>";
+					} else {
+						str = dRollValue;
+					}
+					
+					localCalculationString += str;
+					
+					if (i < amountOfRolls - 1) {
+						localCalculationString += " + ";
+					}
+				}
+				localCalculationString += " )";
+				return { localRollValue, localCalculationString };
+			}
+			
+			// Rolls all available dice together and totals them.
+			function rollAllDice() {
+				var table = document.getElementById("diceTable");
+				
+				calculatedTotal = 0;
+				for (let i = 0; i < table.rows.length; i++) { 
+					var row = table.rows[i];
+					calculatedTotal += rollDiceForRow(row);
+				};
+				
+				return calculatedTotal;
+			}
+			
+			// Writes the result at the end of the row (and any calculation strings).
+			function writeResult(element, diceType, rollValue, maximumValue, calculationString) {
+				var rollValueHTML = "";
+				// Rolled a natural 1.
+				if (rollValue == 1) {
+					rollValueHTML = "<p>Result: <span style='color:" + failColour + ";font-weight:bold;'>" + rollValue + "</span></p>";
+				// Rolled a crit.
+				} else if (rollValue == maximumValue) {
+					rollValueHTML = "<p>Result: <span style='color:" + critColour + ";font-weight:bold;'>" + rollValue + "</span></p>";
+				// Rolled a normal number.
+				} else {
+					rollValueHTML = "<p>Result: " + rollValue + "</p>";
+				}
+				
+				if (calculationString != "") {
+					rollValueHTML = rollValueHTML.replace("</p>", " " + calculationString + "</p>");
+				}
+				
+				//element.innerHTML = rollValueHTML;
+				
+				var newListElement = document.createElement("li");
+				newListElement.innerHTML = rollValueHTML.replace("<p>", "<p>" + diceType + " : ");
+				diceRollHistory.append(newListElement);
+			}
+			
+			// Clear log
+			function clearRollHistory() {
+				diceRollHistory.innerHTML = "";
+				totalRollValue = 0;
+				displayNewTotal();
+			}
+			
+			// Updates the "Total: 0" UI to include all results added up from the log column.
+			function displayNewTotal() {
+				document.getElementById("totalRollValue").innerHTML = totalRollValue;
+			}
+		</script>
+	</head>
+	<body>
+		<h1>Renegade Dice Roller</h1>
+		<div class="flex-container">
+			<div>
+				<h4>Dice Shift Ladder</h4>
+				<table id="diceShiftLadder">
+					<tr>
+						<td>
+							<p>Critical Success</p>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<p>Auto Success</p>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<p>3d6</p>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<p>2d8</p>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<p>d20</p>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<p>d12</p>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<p>d10</p>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<p>d8</p>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<p>d6</p>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<p>d4</p>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<p>d2</p>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<p>Base Dice</p>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<p>Auto Fail</p>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<p>Fumble</p>
+						</td>
+					</tr>
+				</table>
+			</div>
+			<div>
+				<h4>Dice</h4>
+				<table id="diceTable">
+					<tr class="tableRow">
+						<td>
+							<p>d2</p>
+						</td>
+						<td>
+							<button class="roll">Roll</button>
+						</td>
+						<td>
+							<p></p>
+						</td>
+					</tr>
+					<tr class="tableRow">
+						<td>
+							<p>d4</p>
+						</td>
+						<td>
+							<button class="roll">Roll</button>
+						</td>
+						<td>
+							<p></p>
+						</td>
+					</tr>
+					<tr class="tableRow">
+						<td>
+							<p>d6</p>
+						</td>
+						<td>
+							<button class="roll">Roll</button>
+						</td>
+						<td>
+							<p></p>
+						</td>
+					</tr>
+					<tr class="tableRow">
+						<td>
+							<p>d8</p>
+						</td>
+						<td>
+							<button class="roll">Roll</button>
+						</td>
+						<td>
+							<p></p>
+						</td>
+					</tr>
+					<tr class="tableRow">
+						<td>
+							<p>d10</p>
+						</td>
+						<td>
+							<button class="roll">Roll</button>
+						</td>
+						<td>
+							<p></p>
+						</td>
+					</tr>
+					<tr class="tableRow">
+						<td>
+							<p>d12</p>
+						</td>
+						<td>
+							<button class="roll">Roll</button>
+						</td>
+						<td>
+							<p></p>
+						</td>
+					</tr>
+					<tr class="tableRow">
+						<td>
+							<p>d20</p>
+						</td>
+						<td>
+							<button class="roll">Roll</button>
+						</td>
+						<td>
+							<p></p>
+						</td>
+					</tr>
+					<tr class="tableRow">
+						<td>
+							<p>2d8</p>
+						</td>
+						<td>
+							<button class="roll">Roll</button>
+						</td>
+						<td>
+							<p></p>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<p>3d6</p>
+						</td>
+						<td>
+							<button class="roll">Roll</button>
+						</td>
+						<td>
+							<p></p>
+						</td>
+					</tr>
+				</table>	
+				<button onclick="rollAllDice()">Roll All</button>
+			</div>
+			<div>
+				<h4>Log</h4>
+				<ol id="diceRollHistory">
+				</ol>
+				<p>Total: <span id="totalRollValue" style="color:blue"></span></p>
+				<button onclick="clearRollHistory()">Clear</button>
+			</div>
+		</div>		
+	</body>
+</html>

@@ -60,6 +60,7 @@
 			const selectedDice = [];
 			
 			var diceRollHistory = null;
+			
 			var totalRollValue = 0;
 			var totalNumberOfCrits = 0;
 			
@@ -109,7 +110,10 @@
 				} else {
 					maximumValue = diceType.replace("d", "");
 					rollValue = getRndInteger(1, maximumValue);
-					if (rollValue == maximumValue) {
+					
+					let shouldIgnoreCrit = (diceType == "d2" && !document.getElementById("checkboxIncludeDTwoCrits").checked);
+					
+					if ((rollValue == maximumValue) && !shouldIgnoreCrit) {
 						totalNumberOfCrits++;
 					}
 				}
@@ -134,6 +138,7 @@
 						str = "<span style='color:" + failColour + ";font-weight:bold;'>" + dRollValue + "</span>";
 					} else if (dRollValue == diceValue) {
 						str = "<span style='color:" + critColour + ";font-weight:bold;'>" + dRollValue + "</span>";
+						(diceType == "d2" && !document.getElementById("checkboxIncludeDTwoCrits").checked)
 						totalNumberOfCrits++;
 					} else {
 						str = dRollValue;
@@ -170,7 +175,15 @@
 					rollValueHTML = "<p>Result: <span style='color:" + failColour + ";font-weight:bold;'>" + rollValue + "</span></p>";
 				// Rolled a crit.
 				} else if (rollValue == maximumValue) {
-					rollValueHTML = "<p>Result: <span style='color:" + critColour + ";font-weight:bold;'>" + rollValue + "</span></p>";
+					// For 2d8 and 3d6 don't want to include a crit if the total of these rolls equals 8 or 6.
+					// For d2s it's crits aren't always allowed, so allow the user to toggle them on/off.
+					let shouldIgnoreCrit = (multipleDiceSelection.includes(diceType) || (diceType == "d2" && !document.getElementById("checkboxIncludeDTwoCrits").checked));
+					
+					if (shouldIgnoreCrit) {
+						rollValueHTML = "<p>Result: " + rollValue + "</p>";
+					} else {
+						rollValueHTML = "<p>Result: <span style='color:" + critColour + ";font-weight:bold;'>" + rollValue + "</span></p>";
+					}
 				// Rolled a normal number.
 				} else {
 					rollValueHTML = "<p>Result: " + rollValue + "</p>";
@@ -207,7 +220,13 @@
 		<div class="flex-container">
 			
 			<div>
-				<h4>Dice</h4>
+				<h4>Dice 
+					<span style="float:right;font-weight:normal">
+						<input type="checkbox" id="checkboxIncludeDTwoCrits" name="checkboxIncludeDTwoCrits" value="true">
+						<label>Include crits from d2 rolls</label>
+					</span>
+				</h4>
+				
 				<table id="diceTable">
 					<tr class="tableRow">
 						<td>
@@ -309,7 +328,8 @@
 						</td>
 					</tr>
 				</table>	
-				<p><button onclick="rollAllDice()">Roll All</button></p>
+				<p><button onclick="rollAllDice()">Roll All</button>
+				</p>
 			</div>
 			<div>
 				<h4>Log</h4>

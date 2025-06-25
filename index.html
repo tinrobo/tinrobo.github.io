@@ -13,15 +13,13 @@
   				font-weight: 400;
   				font-style: normal;
   				font-variation-settings:
-    			"wdth" 100;
-    			width: 100%;
     			
 			}
 			
 			.flex-container {
 				display: flex;
 				flex-direction: row;
-				width: 80%;
+				margin: 0 10px 0 10px;
 			}
 			
 			.flex-container > div {
@@ -33,15 +31,19 @@
 				padding-right: 15px;
 			}
 			
-			.dsladder table {
-				width: 100%;
-				tr:nth-child(even) {background: #CCC}
-				tr:nth-child(odd) {background: #FFF}
+			.flex-container tr {
+				line-height: 0.15em;}
+			
+			.dsladder table.grid tbody tr:nth-child(odd) td {
+    			background: #fff;
 			}
 			
 			.dsladder td	{
-				padding: 5px;
+				padding: 0 10px 0 10px;
 				font-size: 0.75em;
+			}
+			.dsladder tr	{
+				line-height: 0.25em;
 			}
 			
 			ol li{
@@ -320,73 +322,76 @@
 			</div>
 			<div class="dsladder">
 				<h4>Dice Shift Ladder</h4>
-				<table id="diceShiftLadder">
+				<table id="diceShiftLadder" class="form grid">
+				<tbody>
 					<tr>
 						<td>
-							Auto Critical Success
+							<p>Auto Critical Success</p>
 						</td>
 					</tr>
 					<tr>
 						<td>
-							Auto Success
+							<p>Auto Success</p>
 						</td>
 					</tr>
 					<tr>
 						<td>
-							3d6
+							<p>3d6</p>
 						</td>
 					</tr>
 					<tr>
 						<td>
-							2d8
+							<p>2d8</p>
 						</td>
 					</tr>
 					<tr>
 						<td>
-							d12
+							<p>d12</p>
 						</td>
 					</tr>
 					<tr>
 						<td>
-							d10
+							<p>d10</p>
 						</td>
 					</tr>
 					<tr>
 						<td>
-							d8
+							<p>d8</p>
 						</td>
 					</tr>
 					<tr>
 						<td>
-							d6
+							<p>d6</p>
 						</td>
 					</tr>
 					<tr>
 						<td>
-							d4
+							<p>d4</p>
 						</td>
 					</tr>
 					<tr>
 						<td>
-							d2
+							<p>d2</p>
 						</td>
 					</tr>
 					<tr>
 						<td>
-							Base Dice (d20)
+							<p>Base Dice (d20)</p>
 						</td>
 					</tr>
 					<tr>
 						<td>
-							Auto Fail
+							<p>Auto Fail</p>
 						</td>
 					</tr>
 					<tr>
 						<td>
-							Fumble
+							<p>Auto Fumble</p>
 						</td>
 					</tr>
+					</tbody>
 				</table>
+				<p></p>
 			</div>
 		</div>		
 	</body>

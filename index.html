@@ -91,7 +91,7 @@
 			function rollDiceForRow(row) {
 				const rollValueElement = row.cells[row.cells.length - 1];
 				let diceTypeElement = row.cells[0];
-				const diceType = diceTypeElement.innerText;
+				const diceType = diceTypeElement.innerText.trim();
 				var rollValue = 0;
 				var maximumValue = 0;
 				var calculationString = "";

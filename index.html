@@ -137,9 +137,14 @@
 					if (dRollValue == 1) {
 						str = "<span style='color:" + failColour + ";font-weight:bold;'>" + dRollValue + "</span>";
 					} else if (dRollValue == diceValue) {
-						str = "<span style='color:" + critColour + ";font-weight:bold;'>" + dRollValue + "</span>";
-						(diceType == "d2" && !document.getElementById("checkboxIncludeDTwoCrits").checked)
-						totalNumberOfCrits++;
+						let shouldIgnoreCrit = (diceValue == 2 && !document.getElementById("checkboxIncludeDTwoCrits").checked);
+						
+						if (shouldIgnoreCrit) {
+							str = dRollValue;
+						} else {
+							str = "<span style='color:" + critColour + ";font-weight:bold;'>" + dRollValue + "</span>";
+							totalNumberOfCrits++;
+						}	
 					} else {
 						str = dRollValue;
 					}
